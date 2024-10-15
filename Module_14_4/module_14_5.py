@@ -21,7 +21,7 @@ class RegistrationState(StatesGroup):
     username = State()
     email = State()
     age = State()
-    balance = State(1000)
+    balance = 1000
 
 @dp.message_handler(text='Рассчитать')
 async def main_menu(message):
@@ -33,9 +33,10 @@ async def regisrtration(message):
     await RegistrationState.username.set()
 @dp.message_handler(text='Купить')
 async def get_buying_list(message):
+    products = get_all_products()
     for i in range(4):
         with open(f'imeges/{i+1}.jpg', 'rb') as img:
-            await message.answer_photo(img, f'Название: {products_all[i][1]} | Описание: {products_all[i][2] } | Цена: {products_all[i][3]}')
+            await message.answer_photo(img, f'Название: {products[i][1]} | Описание: {products[i][2] } | Цена: {products[i][3]}')
     await message.answer(text='Выберите продукт для покупки:', reply_markup=produkt_kb)
 
 @dp.callback_query_handler(text='formulas')
@@ -88,13 +89,13 @@ async def send_calories(message, state):
 
 @dp.message_handler(state=RegistrationState.username)
 async def set_username(message, state):
-    if not is_included(message.text):
-        await state.update_data(username=message.text)
-    else:
+    if is_included(message.text):
         await message.answer('Пользователь существует, введите другое имя:')
         await RegistrationState.username.set()
-    await message.answer('Введите свой email:')
-    await RegistrationState.email.set()
+    else:
+        await state.update_data(username=message.text)
+        await message.answer('Введите свой email:')
+        await RegistrationState.email.set()
 
 @dp.message_handler(state=RegistrationState.email)
 async def set_email(message, state):
